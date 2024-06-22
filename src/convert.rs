@@ -16,19 +16,21 @@ pub struct ContentConverter {
     epub_builder: EpubBuilder<ZipCommand>,
     vol_regex: Cow<'static, Regex>,
     chap_regex: Cow<'static, Regex>,
+    default_title: String,
     content_buffer: Option<Content>,
     epub_path: PathBuf,
 }
 
 impl ContentConverter {
-    pub fn new(txt_path: &PathBuf, builder: Epub, vol: RegexRef, chap: RegexRef) -> Result<Self> {
+    pub fn new(txt: &PathBuf, e: Epub, vol: RegexRef, chap: RegexRef, t: String) -> Result<Self> {
         Ok(Self {
-            txt_file: BufReader::new(File::open(txt_path)?),
-            epub_builder: builder,
+            txt_file: BufReader::new(File::open(txt)?),
+            epub_builder: e,
             vol_regex: vol,
             chap_regex: chap,
+            default_title: t,
             content_buffer: None,
-            epub_path: txt_path.with_extension("epub"),
+            epub_path: txt.with_extension("epub"),
         })
     }
 
@@ -52,6 +54,8 @@ impl ContentConverter {
     fn create_content_buffer(&mut self, title: String, level: i32) -> Result<()> {
         let is_first = self.content_buffer.is_none();
         self.flush_last_content_buffer()?;
+
+        println!("add {level} level chap: {title}");
 
         let mut content = Content::new(title, level).context("create epub content fail.")?;
         if is_first {
@@ -77,7 +81,7 @@ impl ContentConverter {
 
             // 正文前没有卷标题或章标题使用「默认章节」作为标题
             if self.content_buffer.is_none() {
-                self.create_content_buffer("默认章节".into(), 1)?;
+                self.create_content_buffer(self.default_title.clone(), 1)?;
             }
 
             // 写入正文

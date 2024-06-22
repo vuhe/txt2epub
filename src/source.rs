@@ -47,6 +47,9 @@ pub struct Args {
     /// Epub language, default 'zh'
     #[arg(long)]
     lang: Option<String>,
+    /// Epub default title when title missing, default '默认章节'
+    #[arg(long)]
+    default_title: Option<String>,
     /// Volume match regex for match volume title
     #[arg(long)]
     vol_regex: Option<Regex>,
@@ -144,9 +147,12 @@ impl Args {
         let zip_type = ZipCommand::new().into_anyhow()?;
         let mut epub_builder = EpubBuilder::new(zip_type).into_anyhow()?;
 
-        epub_builder.set_title(self.book_name());
+        let book_name = self.book_name();
+        println!("book name: {book_name}");
+        epub_builder.set_title(book_name);
         epub_builder.set_lang(self.lang());
         if let Some(author) = self.author() {
+            println!("author: {author}");
             epub_builder.add_author(author);
         }
 
@@ -179,6 +185,7 @@ impl Args {
             None => Cow::Borrowed(regex!(r"^第[0-9一二三四五六七八九十零〇百千两 ]+[章回节集卷部]|^[Ss]ection.{1,20}$|^[Cc]hapter.{1,20}$|^[Pp]age.{1,20}$|^\d{1,4}$|^\d+、|^引子$|^楔子$|^章节目录|^章节|^序章").deref()),
         };
 
-        ContentConverter::new(&self.filename, epub_builder, vol_regex, chap_regex)
+        let title = self.default_title.unwrap_or("默认章节".into());
+        ContentConverter::new(&self.filename, epub_builder, vol_regex, chap_regex, title)
     }
 }

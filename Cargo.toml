@@ -1,6 +1,6 @@
 [package]
 name = "txt2epub"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 
 [profile.release]
@@ -13,8 +13,8 @@ anyhow = "1"
 rand = "0.8"
 indoc = "2"
 lazy-regex = "3"
-quick-xml = "0.32"
-epub-builder = "0.7"
+quick-xml = "0.33"
+epub-builder = { version = "0.7", default-features = false, features = ["zip-command"] }
 imageinfo = "0.7"
 uuid = { version = "1", features = ["v4"] }
 reqwest = { version = "0.12", features = ["blocking"] }
