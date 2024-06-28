@@ -38,16 +38,19 @@ pub struct Args {
     /// Cover image path, use Orly image if None
     #[arg(long)]
     cover: Option<PathBuf>,
+    /// Cover title if cover use orly image, default use book name
+    #[arg(long)]
+    orly_title: Vec<String>,
     /// Color idx (0-16) if cover use orly image, default random color
-    #[arg(value_parser = clap::value_parser!(u8).range(1..17))]
+    #[arg(long, value_parser = clap::value_parser!(u8).range(1..17))]
     orly_color: Option<u8>,
     /// Image idx (0-41) if cover use orly image, default random image
-    #[arg(value_parser = clap::value_parser!(u8).range(0..=41))]
+    #[arg(long, value_parser = clap::value_parser!(u8).range(0..=41))]
     orly_idx: Option<u8>,
     /// Epub language, default 'zh'
     #[arg(long)]
     lang: Option<String>,
-    /// Epub default title when title missing, default '默认章节'
+    /// Epub default chap title when title missing, default '默认章节'
     #[arg(long)]
     default_title: Option<String>,
     /// Volume match regex for match volume title
@@ -111,7 +114,11 @@ impl Args {
         match self.cover.as_ref() {
             Some(path) => Ok(std::fs::read(path).context("read cover file fail.")?),
             None => {
-                let title = self.book_name();
+                let title = if self.orly_title.is_empty() {
+                    self.book_name()
+                } else {
+                    Cow::Owned(self.orly_title.join("\n"))
+                };
                 let author = self.author().unwrap_or("unknown");
                 let orly_color = self
                     .orly_color
