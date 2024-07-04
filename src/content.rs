@@ -62,17 +62,22 @@ impl Content {
         self.reference_type = Some(ReferenceType::Text);
     }
 
-    pub fn write_line(&mut self, text: String) -> Result<()> {
+    pub fn write_line(&mut self, mut text: String) -> Result<()> {
+        text.retain(|c| match c {
+            '\t' | '\n' | '\r' => true,
+            '\0'..='\x1F' | '\x7F' => false,
+            _ => true,
+        });
+        let text = text.trim();
         if text.is_empty() {
             // skip empty line
-        } else if regex_is_match!(r"^(=+|-+|—+|\*+)$", &text) {
+        } else if regex_is_match!(r"^(=+|-+|—+|\*+)$", text) {
             self.writer
                 .write_event(Event::Empty(BytesStart::new("hr")))?;
         } else {
             self.writer
                 .write_event(Event::Start(BytesStart::new("p")))?;
-            self.writer
-                .write_event(Event::Text(BytesText::new(&text)))?;
+            self.writer.write_event(Event::Text(BytesText::new(text)))?;
             self.writer.write_event(Event::End(BytesEnd::new("p")))?;
         }
         Ok(())
