@@ -9,7 +9,7 @@ use epub_builder::{EpubBuilder, EpubVersion, ZipCommand};
 use imageinfo::ImageInfo;
 use indoc::formatdoc;
 use lazy_regex::{regex, regex_captures, Regex};
-use rand::{thread_rng, Rng};
+use rand::{rng, Rng};
 
 use crate::convert::ContentConverter;
 use crate::error::EyreToAnyhow;
@@ -120,12 +120,8 @@ impl Args {
                     Cow::Owned(self.orly_title.join("\n"))
                 };
                 let author = self.author().unwrap_or("unknown");
-                let orly_color = self
-                    .orly_color
-                    .unwrap_or_else(|| thread_rng().gen_range(1..17));
-                let orly_idx = self
-                    .orly_idx
-                    .unwrap_or_else(|| thread_rng().gen_range(0..=41));
+                let orly_color = self.orly_color.unwrap_or_else(|| rng().random_range(1..17));
+                let orly_idx = self.orly_idx.unwrap_or_else(|| rng().random_range(0..=41));
                 gen_orly_cover(&title, author, orly_color, orly_idx)
             }
         }

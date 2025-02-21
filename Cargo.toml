@@ -10,11 +10,11 @@ panic = "abort"
 
 [dependencies]
 anyhow = "1"
-rand = "0.8"
+rand = "0.9"
 indoc = "2"
 lazy-regex = "3"
-quick-xml = "0.35"
-epub-builder = { version = "0.7", default-features = false, features = ["zip-command"] }
+quick-xml = "0.37"
+epub-builder = { version = "0.8", default-features = false, features = ["zip-command"] }
 imageinfo = "0.7"
 uuid = { version = "1", features = ["v4"] }
 reqwest = { version = "0.12", features = ["blocking"] }
